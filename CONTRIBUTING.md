@@ -49,6 +49,7 @@ tsconfig.docs.json           # Public-import example validation
 | `npm run format`          | Format source, config, and documentation.                       |
 | `npm run format:check`    | Verify formatting without edits.                                |
 | `npm test`                | Run Vitest once.                                                |
+| `npm run test:workflows`  | Check Pages site assembly and preview cleanup.                  |
 | `npm run test:watch`      | Watch affected tests.                                           |
 | `npm run test:coverage`   | Text, HTML, and LCOV reports under `coverage/`.                 |
 | `npm pack`                | Run prepack type check/build and create an installable tarball. |
@@ -81,6 +82,7 @@ npm run format:check
 npm run typecheck
 npm run typecheck:docs
 npm test
+npm run test:workflows
 npm run build
 npm run build-storybook
 ```
