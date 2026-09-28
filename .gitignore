@@ -8,6 +8,7 @@ storybook*.log
 *.tsbuildinfo
 .idea/
 .vscode/
+.husky/_/
 .DS_Store
 npm-debug.log*
 test-run.log

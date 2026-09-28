@@ -96,3 +96,10 @@ rejection. They do not exercise GitHub's hosted permissions or live Pages APIs.
 References: [workflow events](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows),
 [secure use](https://docs.github.com/en/actions/reference/security/secure-use),
 [Pages deployment action](https://github.com/actions/deploy-pages).
+
+## Contribution templates
+
+New issues use the bug-report or feature-request templates. Blank issues are
+disabled so reports include reproduction and environment details. Pull requests
+use `.github/PULL_REQUEST_TEMPLATE.md`, which asks for validation, documentation,
+stories, regression coverage, and release notes.

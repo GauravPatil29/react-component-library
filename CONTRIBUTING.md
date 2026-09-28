@@ -8,6 +8,7 @@ Use Node.js 24.21 or later in the Node 24 line and npm. Install with `npm ci`.
 Use `npm install` when changing dependencies, and include the updated lockfile.
 Start `npm run storybook` for interactive development at http://localhost:6006.
 `npm run dev` watches library builds; it does not launch a web application.
+`npm ci` runs the `prepare` script and installs the Husky pre-commit hook.
 
 ## Structure
 
@@ -51,6 +52,12 @@ tsconfig.docs.json           # Public-import example validation
 | `npm run test:watch`      | Watch affected tests.                                           |
 | `npm run test:coverage`   | Text, HTML, and LCOV reports under `coverage/`.                 |
 | `npm pack`                | Run prepack type check/build and create an installable tarball. |
+
+Every commit runs `npm run lint`, `npm run format:check`, `npm test`, and
+`npm run build` through `.husky/pre-commit`. This is intentionally a full check
+because the package build is part of the commit contract. If a commit must be
+created while investigating a broken check, use `git commit --no-verify` and run
+the checks before pushing; do not use that option to bypass an unresolved change.
 
 ## Add a component
 
