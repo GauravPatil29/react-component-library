@@ -10,6 +10,7 @@ provides sorting, search, pagination, summaries, CSV export callbacks, and drill
 - [Complete examples](docs/examples/README.md) — client data, server data, and export/ref integration.
 - [Contributing](CONTRIBUTING.md) — development, project structure, and adding components.
 - [Testing](docs/testing.md) — conventions, coverage, and tool choices.
+- [Live Storybook](https://gauravpatil29.github.io/react-component-library/) — browse the published component examples.
 
 See [GitHub automation](docs/automation.md) for master tags, production Storybook,
 and PR testing-site deployment setup.
@@ -89,7 +90,8 @@ npm run typecheck:docs  # Check complete documentation examples
 ```
 
 Storybook includes default, summary, loading, empty, scrollable, clickable, and
-highlighted examples. Its export callback logs to the Actions panel.
+highlighted examples. Its export callback logs to the Actions panel. Browse the
+published examples at [gauravpatil29.github.io/react-component-library](https://gauravpatil29.github.io/react-component-library/).
 
 ## Package output
 
