@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "react-library": ["./src/index.ts"],
+      "react-library/MaterialTable": ["./src/components/MaterialTable/index.tsx"]
+    }
+  },
+  "include": ["docs/examples/**/*.ts", "docs/examples/**/*.tsx"]
+}

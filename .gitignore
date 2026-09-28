@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+storybook-static/
+*storybook.log
+storybook*.log
+*.tgz
+*.tsbuildinfo
+.idea/
+.vscode/
+.DS_Store
+npm-debug.log*
+test-run.log
