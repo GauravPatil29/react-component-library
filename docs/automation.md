@@ -38,7 +38,8 @@ https://<owner>.github.io/<repository>/pr-123/   PR testing site
 ```
 
 The actual deployment URL is in the Actions job summary. No PR bot comments are
-posted. Previews share the Pages origin and visibility with production; they are
+posted for production or cleanup runs. Successful preview deployments add or
+update one idempotent Storybook comment on the PR. Previews share the Pages origin and visibility with production; they are
 separate paths, not isolated domains or private environments.
 
 ## Build and deployment separation
