@@ -1,0 +1,138 @@
+name: Deploy Storybook
+
+on:
+  workflow_run:
+    workflows: [Build and test]
+    types: [completed]
+  pull_request_target:
+    branches: [master]
+    types: [closed]
+
+permissions:
+  contents: read
+
+# Production, previews, and cleanup share one site and must never write concurrently.
+concurrency:
+  group: storybook-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'pull_request_target' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+      pull-requests: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}${{ steps.plan.outputs.suffix }}
+    steps:
+      - name: Validate source run and choose destination
+        id: plan
+        uses: actions/github-script@v8
+        with:
+          script: |
+            if (context.eventName === 'pull_request_target') {
+              const { data: pull } = await github.rest.pulls.get({
+                ...context.repo, pull_number: context.payload.pull_request.number,
+              });
+              if (pull.state !== 'closed') return;
+              core.setOutput('mode', 'remove');
+              core.setOutput('number', context.payload.pull_request.number);
+              return;
+            }
+            const run = context.payload.workflow_run;
+            if (run.repository.full_name !== `${context.repo.owner}/${context.repo.repo}`) return;
+            if (run.event === 'push' || run.event === 'workflow_dispatch') {
+              if (run.head_branch !== 'master') return;
+              const { data: branch } = await github.rest.repos.getBranch({ ...context.repo, branch: 'master' });
+              if (branch.commit.sha !== run.head_sha) {
+                core.notice('Skipping an outdated master build.');
+                return;
+              }
+              core.setOutput('mode', 'production');
+              return;
+            }
+            if (run.event !== 'pull_request') return;
+            const { data: pulls } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              ...context.repo, commit_sha: run.head_sha,
+            });
+            const pull = pulls.find(pr => pr.state === 'open' && pr.base.ref === 'master' && pr.head.sha === run.head_sha);
+            if (!pull) {
+              core.notice('Skipping a closed or outdated PR build.');
+              return;
+            }
+            core.setOutput('mode', 'preview');
+            core.setOutput('number', pull.number);
+            core.setOutput('suffix', `pr-${pull.number}/`);
+      # Always use trusted master code, including for fork PR artifacts and cleanup.
+      - uses: actions/checkout@v6
+        if: steps.plan.outputs.mode != ''
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        if: steps.plan.outputs.mode != ''
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - uses: actions/download-artifact@v5
+        if: steps.plan.outputs.mode != '' && steps.plan.outputs.mode != 'remove'
+        with:
+          name: storybook
+          path: incoming-storybook
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+      - name: Load saved site
+        if: steps.plan.outputs.mode != ''
+        shell: bash
+        run: |
+          if git ls-remote --exit-code --heads origin gh-pages > /dev/null; then
+            git fetch origin gh-pages
+            git worktree add --detach pages-state FETCH_HEAD
+          else
+            git worktree add --detach pages-state HEAD
+            git -C pages-state checkout --orphan pages-initial
+            git -C pages-state rm -rf .
+          fi
+      - name: Update static site
+        if: steps.plan.outputs.mode != ''
+        env:
+          PUBLISH_MODE: ${{ steps.plan.outputs.mode }}
+          PR_NUMBER: ${{ steps.plan.outputs.number }}
+        run: node .github/scripts/update-pages.mjs
+      - name: Save site state
+        if: steps.plan.outputs.mode != ''
+        shell: bash
+        run: |
+          git -C pages-state config user.name 'github-actions[bot]'
+          git -C pages-state config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C pages-state add --all
+          if ! git -C pages-state diff --cached --quiet; then
+            git -C pages-state commit -m 'Update Storybook site'
+            git -C pages-state push origin HEAD:gh-pages
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.plan.outputs.mode != ''
+        with:
+          # Keep reruns and overlapping event types from colliding on the default
+          # github-pages artifact name in the same workflow run.
+          name: github-pages-${{ github.run_id }}
+          path: pages-site
+      - name: Publish site
+        id: publish
+        if: steps.plan.outputs.mode != ''
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}
+      - name: Report URL
+        if: steps.plan.outputs.mode != ''
+        env:
+          SITE_URL: ${{ steps.publish.outputs.page_url }}
+          SUFFIX: ${{ steps.plan.outputs.suffix }}
+        run: |
+          printf 'Storybook deployment: %s%s\n' "$SITE_URL" "$SUFFIX" >> "$GITHUB_STEP_SUMMARY"

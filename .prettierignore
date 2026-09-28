@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+storybook-static/
+package-lock.json
+.idea/
+.vscode/
+.agents/
+.codex/
+*.log
+*.tgz
