@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/GauravPatil29/react-component-library/tree/master/docs
+    about: Check the API, examples, testing, and deployment guides first.
+  - name: Live Storybook
+    url: https://gauravpatil29.github.io/react-component-library/
+    about: Browse the published component examples.

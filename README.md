@@ -87,6 +87,8 @@ npm run lint
 npm run format:check
 npm run typecheck
 npm run typecheck:docs  # Check complete documentation examples
+npm run test:workflows  # Check Pages site assembly and preview cleanup
+npm test
 ```
 
 Storybook includes default, summary, loading, empty, scrollable, clickable, and

@@ -18,9 +18,16 @@ tags are never moved. Direct master pushes follow the same path as merges.
 
 ## One-time GitHub setup
 
-The local repository currently has no remote. After pushing it to GitHub:
+The deployment workflow uses a two-stage `workflow_run` design: the unprivileged
+PR build creates the Storybook artifact, and the privileged deployment workflow
+publishes that artifact. GitHub only registers `workflow_run` workflows from the
+default branch. Therefore this workflow must be merged into `master` once before
+PR preview deployment can start. A PR containing the workflow itself can run CI,
+but it cannot deploy its own preview yet.
 
-1. Set **master** as the default branch. The deployment workflow must be present there before PR builds can trigger it.
+After pushing it to GitHub:
+
+1. Set **master** as the default branch. Merge the workflow files to master before expecting PR deployments.
 2. Under **Settings → Pages**, select **GitHub Actions** as the source.
 3. Enable Actions and allow these workflows' job permissions. Repository rules must permit the Actions token to create tags and update `gh-pages`.
 4. Allow deployments from master in the **github-pages** environment. Required reviewers, if configured, delay automatic publication.
@@ -89,3 +96,10 @@ rejection. They do not exercise GitHub's hosted permissions or live Pages APIs.
 References: [workflow events](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows),
 [secure use](https://docs.github.com/en/actions/reference/security/secure-use),
 [Pages deployment action](https://github.com/actions/deploy-pages).
+
+## Contribution templates
+
+New issues use the bug-report or feature-request templates. Blank issues are
+disabled so reports include reproduction and environment details. Pull requests
+use `.github/PULL_REQUEST_TEMPLATE.md`, which asks for validation, documentation,
+stories, regression coverage, and release notes.
